@@ -1,0 +1,6 @@
+[2026-04-24 01:56:49] INFO - Logger initialized successfully.
+[2026-04-24 01:56:50] INFO - Entered the data ingestion method or component
+[2026-04-24 01:56:50] INFO - Read the dataset as dataframe
+[2026-04-24 01:56:50] INFO - Train test split initiated
+[2026-04-24 01:56:50] INFO - Train test split completed
+[2026-04-24 01:56:50] INFO - Ingestion of the data is completed
