@@ -18,6 +18,24 @@ class DataTransformation:
     def __init__(self):
         self.data_transformation_config = DataTransformationConfig()
 
+    def clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Clean raw data to match the preprocessing done in the EDA notebook."""
+        df = df.copy()
+        # Levy: '-' represents missing, replace with NaN so imputer handles it
+        if 'Levy' in df.columns:
+            df['Levy'] = df['Levy'].replace({'-': None})
+            df['Levy'] = pd.to_numeric(df['Levy'], errors='coerce')
+        # Engine volume: strip 'Turbo' text, then convert to float
+        if 'Engine volume' in df.columns:
+            df['Engine volume'] = (
+                df['Engine volume']
+                .astype(str)
+                .str.replace(r'\bTurbo\b', '', regex=True)
+                .str.strip()
+            )
+            df['Engine volume'] = pd.to_numeric(df['Engine volume'], errors='coerce')
+        return df
+
     def get_data_transformer_object(self):
         try:
             numerical_columns =['Levy', 'Prod. year', 'Engine volume', 'Cylinders', 'Airbags']
@@ -76,6 +94,10 @@ class DataTransformation:
             input_feature_test_df = test_df.drop(columns=drop_columns)
             target_feature_test_df = test_df[target_column_name]
             logging.info("Applying preprocessing object on training and testing datasets")
+
+            # Apply EDA-style cleaning before the sklearn pipeline
+            input_feature_train_df = self.clean_data(input_feature_train_df)
+            input_feature_test_df = self.clean_data(input_feature_test_df)
 
             input_feature_train_arr = preprocessor_obj.fit_transform(input_feature_train_df)
             input_feature_test_arr = preprocessor_obj.transform(input_feature_test_df)

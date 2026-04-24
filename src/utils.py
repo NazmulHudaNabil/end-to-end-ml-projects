@@ -16,3 +16,13 @@ def save_object(file_path, obj):
     except Exception as e:
         logging.error(f"Error occurred while saving object: {str(e)}")
         raise CustomException(e, sys)
+
+
+def load_object(file_path):
+    try:
+        with open(file_path, "rb") as file_obj:
+            return pickle.load(file_obj)
+
+    except Exception as e:
+        logging.error(f"Error occurred while loading object: {str(e)}")
+        raise CustomException(e, sys)

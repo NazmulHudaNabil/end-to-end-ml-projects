@@ -6,7 +6,7 @@ import os
 from sklearn.model_selection import train_test_split
 from src.component.data_preprocessing import preprocessing_pipeline
 from src.component.data_transformation import DataTransformation
-from src.utils import save_object
+from src.component.model_trainer import ModelTrainer
 
 
 class DataIngestionConfig:
@@ -51,3 +51,6 @@ if __name__ == "__main__":
     train_path, test_path = obj.initiate_data_ingestion()
     logging.info(f"Train path: {train_path}, Test path: {test_path}")
     train_arr, test_arr, preprocessor_path = DataTransformation().initiate_data_transformation(train_path, test_path)
+    logging.info(f"Train array shape: {train_arr.shape}, Test array shape: {test_arr.shape}, Preprocessor path: {preprocessor_path}")
+    model_trainer = ModelTrainer()
+    model_trainer.initiate_model_trainer(train_arr, test_arr)

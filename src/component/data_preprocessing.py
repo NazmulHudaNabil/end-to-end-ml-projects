@@ -11,7 +11,7 @@ class LevyCleaner(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         X = X.copy()
-        X['Levy'] = X['Levy'].fillna({"-":np.nan})
+        X['Levy'] = X['Levy'].replace('-', np.nan)
         return X
 
 
@@ -125,14 +125,16 @@ class IQROutlierFilter(BaseEstimator, TransformerMixin):
     
 
 # Assemble the Pipeline
+# Include Price so extreme price outliers (e.g. $26M) are removed — matching the notebook
 NUMERICAL_COLS = ['Mileage', 'Engine volume', 'Levy']
+OUTLIER_COLS = ['Mileage', 'Engine volume', 'Levy', 'Price', 'Prod. year', 'Cylinders', 'Airbags']
 
 preprocessing_pipeline = Pipeline(steps=[
     ('levy_cleaner', LevyCleaner()),
     ('engine_volume_cleaner', EngineVolumeCleaner()),
     ('mileage_cleaner', MileageCleaner()),
-    ('numeric_converter', NumericConverter(columns=NUMERICAL_COLS)),
+    ('numeric_converter', NumericConverter(columns=NUMERICAL_COLS + ['Price'])),
     ('median_imputer', MedianImputer(columns=NUMERICAL_COLS)),
     ('duplicate_remover', DuplicateRemover()),
-    ('iqr_outlier_filter', IQROutlierFilter(columns=NUMERICAL_COLS))
+    ('iqr_outlier_filter', IQROutlierFilter(columns=OUTLIER_COLS))
 ])
