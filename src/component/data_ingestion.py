@@ -4,6 +4,9 @@ import sys
 import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
+from src.component.data_preprocessing import preprocessing_pipeline
+from src.component.data_transformation import DataTransformation
+from src.utils import save_object
 
 
 class DataIngestionConfig:
@@ -20,6 +23,8 @@ class DataIngestion:
 
         try:
             df = pd.read_csv("notebook/data/car_price_prediction.csv")
+            df = preprocessing_pipeline.fit_transform(df)
+
             logging.info("Read the dataset as dataframe")
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok=True)
             df.to_csv(self.ingestion_config.raw_data_path, index=False, header=True)
@@ -43,4 +48,6 @@ class DataIngestion:
         
 if __name__ == "__main__":
     obj = DataIngestion()
-    obj.initiate_data_ingestion()
+    train_path, test_path = obj.initiate_data_ingestion()
+    logging.info(f"Train path: {train_path}, Test path: {test_path}")
+    train_arr, test_arr, preprocessor_path = DataTransformation().initiate_data_transformation(train_path, test_path)
