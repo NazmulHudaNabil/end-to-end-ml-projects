@@ -6,4 +6,7 @@ scikit-learn
 xgboost
 catboost
 optuna
+uvicorn
+fastapi
+pydantic
 # -e .
