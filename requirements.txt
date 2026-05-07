@@ -9,4 +9,6 @@ optuna
 uvicorn
 fastapi
 pydantic
+sqlalchemy
+pymysql
 # -e .
