@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from pydantic import BaseModel
 import numpy as np
 import pandas as pd
+import time
 from src.pipline.predict_pipline import PredictPipline, CarData
 from src.exception import CustomException
 import sys
@@ -17,7 +18,17 @@ from typing import Generator, Annotated
 
 app = FastAPI()
 
-models.Base.metadata.create_all(bind=engine)
+
+@app.on_event("startup")
+def create_tables_with_retry():
+    for attempt in range(10):
+        try:
+            models.Base.metadata.create_all(bind=engine)
+            return
+        except Exception as error:
+            if attempt == 9:
+                raise error
+            time.sleep(2)
 
 
 def get_db():
