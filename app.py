@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import numpy as np
 import pandas as pd
 import time
+import threading
 from src.pipline.predict_pipline import PredictPipline, CarData
 from src.exception import CustomException
 import sys
@@ -19,16 +20,28 @@ from typing import Generator, Annotated
 app = FastAPI()
 
 
-@app.on_event("startup")
-def create_tables_with_retry():
-    for attempt in range(10):
+def _init_db_in_background():
+    """Try to create DB tables in background so startup never blocks."""
+    for attempt in range(5):
         try:
             models.Base.metadata.create_all(bind=engine)
+            logging.info("Database tables created successfully.")
             return
         except Exception as error:
-            if attempt == 9:
-                raise error
-            time.sleep(2)
+            logging.warning(f"DB init attempt {attempt + 1}/5 failed: {error}")
+            if attempt < 4:
+                time.sleep(5)
+    logging.error("Could not initialise DB tables after 5 attempts. "
+                  "Check DATABASE_URL is set correctly in Render env vars.")
+
+
+@app.on_event("startup")
+def startup_event():
+    # Run DB init in background so uvicorn finishes startup immediately
+    # and binds to the port — Render requires the port to open quickly.
+    thread = threading.Thread(target=_init_db_in_background, daemon=True)
+    thread.start()
+    logging.info("App started. DB initialisation running in background.")
 
 
 def get_db():
