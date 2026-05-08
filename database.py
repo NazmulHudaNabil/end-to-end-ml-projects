@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Railway provides DATABASE_URL directly.
 # Fallback to individual vars for local Docker Compose.
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip() or None
 
 if not DATABASE_URL:
     DB_USER = os.getenv("DB_USER", "nabil")
